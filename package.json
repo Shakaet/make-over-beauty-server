@@ -6,6 +6,7 @@
     "dev": "next dev",
    "build": "next build",
    "start": "next start",
+   "vercel-build": "next build",
    "code": "nodemon ./app/server.js",
    "test": "echo \"Error: no test specified\" && exit 1"
   },
