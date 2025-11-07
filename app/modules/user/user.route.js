@@ -6,7 +6,7 @@ import { catchAsynFunction } from "../../utils/catchasync.js";
 const router = express.Router();
 
 // POST new user
-router.post("/users", catchAsynFunction(async (req, res) => {
+router.post("/", catchAsynFunction(async (req, res) => {
   try {
     const userData = req.body;
     // console.log(userData)
@@ -28,7 +28,7 @@ router.post("/users", catchAsynFunction(async (req, res) => {
 
 
 // Get new user
-router.get("/users", catchAsynFunction(async (req, res) => {
+router.get("/", catchAsynFunction(async (req, res) => {
   
    
 

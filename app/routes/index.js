@@ -4,6 +4,7 @@ import { Router } from "express"
 import { userRoutes } from "../modules/user/user.route.js"
 import { productRoutes } from "../modules/product/product.routes.js"
 import { postRoutes } from "../modules/post/post.route.js"
+import { addToCartRoutes } from "../modules/addTocart/addTocart.route.js"
 
 
 let router = Router()
@@ -20,6 +21,10 @@ let AllRoutes = [
   {
     path:"/posts",
     routes:postRoutes
+  },
+  {
+    path:"/addTocart",
+    routes:addToCartRoutes
   }
 ]
 
