@@ -9,85 +9,91 @@ let router=Router()
 
 
 
-router.post("/:id",async(req,res)=>{
+router.post("/:id", async (req, res) => {
+  let { userEmail, quantity } = req.body;
+  let productId = req.params.id;
 
-      let {userEmail,quantity}= req.body
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    return res.status(400).send({ message: "Invalid product ID" });
+  }
 
-    let productId=req.params.id
+  let session = await mongoose.startSession();
 
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-  return res.status(400).send({ message: "Invalid product ID" });
-}
+  try {
+    session.startTransaction();
 
-    let session = await mongoose.startSession();
-
-    try{
-
-     session.startTransaction();
-
-    let product=await Product.findById(productId).session(session)
-
-
-    if(!product){
-        // throw new Error("Sorry,Product not Found")
-         return res.status(404).send({ message: "Sorry, Product not Found" });
+    // 1️⃣ Find product
+    let product = await Product.findById(productId).session(session);
+    if (!product) {
+      return res.status(404).send({ message: "Sorry, Product not Found" });
     }
 
+    // 2️⃣ Check stock
+    if (product.stock < quantity) {
+      return res.status(400).send({ message: "Insufficient product stock." });
+    }
 
-      
-  if (product.stock < quantity) {
-    // throw new Error("Insufficient product stock.")
-     return res.status(400).send({ message: "Insufficient product stock." });
-  }
+    // 3️⃣ Check if this user already added this product in cart
+    let existingCartItem = await AddToCart.findOne({ userEmail, productId }).session(session);
 
-  
-
-        await Product.findByIdAndUpdate(
-        productId,
-        { $inc: { stock: -quantity } }, // decrement quantity
+    if (existingCartItem) {
+      // 🟢 Update quantity (increase)
+      await AddToCart.updateOne(
+        { userEmail, productId },
+        { $inc: { quantity: quantity } }, // increment quantity
         { session }
-        );
+      );
 
-   let name=product?.name
-   let price=product?.lowprice
-    
-
-
-     let result= await AddToCart.create([{
-        userEmail,
+      // 🔹 Reduce product stock
+      await Product.findByIdAndUpdate(
         productId,
-        name,price,
-        quantity
+        { $inc: { stock: -quantity } },
+        { session }
+      );
 
-        
-     }],{session})
+      await session.commitTransaction();
+      session.endSession();
 
+      return res.send({ message: "Cart quantity updated successfully" });
+    } else {
+      // 🟢 Create new AddToCart entry
+      let name = product?.name;
+      let price = product?.lowprice;
 
-      await session.commitTransaction()
-    await session.endSession()
+      // Reduce product stock
+      await Product.findByIdAndUpdate(
+        productId,
+        { $inc: { stock: -quantity } },
+        { session }
+      );
 
-    
+      let result = await AddToCart.create(
+        [
+          {
+            userEmail,
+            productId,
+            name,
+            price,
+            quantity,
+          },
+        ],
+        { session }
+      );
 
-    res.send(result)
+      await session.commitTransaction();
+      session.endSession();
 
-
-
-    }catch(err){
-
-    await session.abortTransaction()
-    await session.endSession()
-    //  throw new Error("failed Add to Cart")
-    return res.status(500).send({ message: "Failed to add to cart", error: err.message });
-
+      return res.send({ message: "Product added to cart successfully", data: result });
+    }
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    return res
+      .status(500)
+      .send({ message: "Failed to add to cart", error: err.message });
   }
+});
 
-
-
-
-
-
-
-})
 
 
 export let addToCartRoutes=router
