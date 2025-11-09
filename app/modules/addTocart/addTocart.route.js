@@ -96,4 +96,43 @@ router.post("/:id", async (req, res) => {
 
 
 
+// Get add to cart data
+router.get("/", catchAsynFunction(async (req, res) => {
+  
+   
+
+    // use the underlying MongoDB collection directly
+    const result = await AddToCart.find();
+
+    res.status(200).json({ 
+        data:result
+     });
+  } 
+))
+
+
+
+// Get add to cart data
+router.get("/:userEmail", catchAsynFunction(async (req, res) => {
+  
+   
+    let userEmail=req.params.userEmail
+    // use the underlying MongoDB collection directly
+    const result = await AddToCart.find({userEmail});
+
+    
+
+    // const length = result.items ? result.items.length : 0;
+
+      // res.status(200).json({ count: length });
+
+
+    res.status(200).json({ 
+        data:result
+     });
+  } 
+))
+
+
+
 export let addToCartRoutes=router
