@@ -5,7 +5,7 @@ import AddToCart from "./addTocart.model.js";
 import mongoose from "mongoose";
 
 
-let router=Router()
+let router = Router()
 
 
 
@@ -59,6 +59,7 @@ router.post("/:id", async (req, res) => {
       // 🟢 Create new AddToCart entry
       let name = product?.name;
       let price = product?.lowprice;
+      let image = product?.imagePrimary || product?.imageSecondary || null;
 
       // Reduce product stock
       await Product.findByIdAndUpdate(
@@ -75,6 +76,7 @@ router.post("/:id", async (req, res) => {
             name,
             price,
             quantity,
+            image,
           },
         ],
         { session }
@@ -98,41 +100,41 @@ router.post("/:id", async (req, res) => {
 
 // Get add to cart data
 router.get("/", catchAsynFunction(async (req, res) => {
-  
-   
 
-    // use the underlying MongoDB collection directly
-    const result = await AddToCart.find();
 
-    res.status(200).json({ 
-        data:result
-     });
-  } 
+
+  // use the underlying MongoDB collection directly
+  const result = await AddToCart.find();
+
+  res.status(200).json({
+    data: result
+  });
+}
 ))
 
 
 
 // Get add to cart data
 router.get("/:userEmail", catchAsynFunction(async (req, res) => {
-  
-   
-    let userEmail=req.params.userEmail
-    // use the underlying MongoDB collection directly
-    const result = await AddToCart.find({userEmail});
-
-    
-
-    // const length = result.items ? result.items.length : 0;
-
-      // res.status(200).json({ count: length });
 
 
-    res.status(200).json({ 
-        data:result
-     });
-  } 
+  let userEmail = req.params.userEmail
+  // use the underlying MongoDB collection directly
+  const result = await AddToCart.find({ userEmail });
+
+
+
+  // const length = result.items ? result.items.length : 0;
+
+  // res.status(200).json({ count: length });
+
+
+  res.status(200).json({
+    data: result
+  });
+}
 ))
 
 
 
-export let addToCartRoutes=router
+export let addToCartRoutes = router

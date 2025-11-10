@@ -12,8 +12,9 @@ const addToCartSchema = new mongoose.Schema({
   },
   name: { type: String },
   price: { type: Number },
-  quantity: { type: Number,required:true, default: 1 },
-  createdAt: { type: Date, default: Date.now }, 
+  quantity: { type: Number, required: true, default: 1 },
+  image: String,
+  createdAt: { type: Date, default: Date.now },
 });
 
 const AddToCart = mongoose.model("AddToCart", addToCartSchema);
