@@ -2,7 +2,6 @@ import cors from 'cors'
 import express from 'express'
 import { notFound } from './middleware/notfound.js'
 import { globarError } from './middleware/globalError.js'
-import { userRoutes } from './modules/user/user.route.js'
 import router from './routes/index.js'
 
 
