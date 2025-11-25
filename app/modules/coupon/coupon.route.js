@@ -50,6 +50,14 @@ router.post("/create", async (req, res) => {
       });
     }
 
+       // Discount limit check
+    if (discountPercentage > 90) {
+      return res.status(400).json({
+        success: false,
+        message: "Discount cannot be more than 90%",
+      });
+    }
+
     
 
     // Check for duplicate
