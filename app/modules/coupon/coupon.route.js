@@ -22,6 +22,12 @@ router.post("/validate", async (req, res) => {
         return res.status(400).json({ success: false, message: "Coupon is inactive" });
     }
 
+    let havePerchantages= coupon.discountPercentage
+    if(!havePerchantages){
+        return res.status(400).json({ success: false, message: "Coupon has no discount percentage" });
+    }
+
+
     if (new Date() > coupon.expiresAt) {
       return res.status(400).json({ success: false, message: "Coupon expired" });
     }
@@ -65,7 +71,7 @@ router.post("/create", async (req, res) => {
     if (existingCoupon) {
       return res.status(400).json({
         success: false,
-        message: "Coupon code already exists",
+        message: "Coupon code already exists,try another one",
       });
     }
 
