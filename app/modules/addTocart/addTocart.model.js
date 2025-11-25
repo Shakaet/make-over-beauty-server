@@ -13,7 +13,7 @@ const addToCartSchema = new mongoose.Schema({
   name: { type: String },
   price: { type: Number },
   quantity: { type: Number, required: true, default: 1 },
-  image: String,
+  image: {type:String},
   createdAt: { type: Date, default: Date.now },
 });
 
