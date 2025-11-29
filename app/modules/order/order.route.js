@@ -110,6 +110,46 @@ router.post("/",catchAsynFunction( async (req, res) =>{
 }))
 
 
+router.get("/:email", catchAsynFunction(async (req, res) => {
+
+    const { email } = req.params;
+
+    // ❗ Basic validation
+    if (!email) {
+        throw new Error("Email is required");
+    }
+
+    // Check valid email format (optional)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        throw new Error("Invalid email format");
+    }
+
+    // ✔ Check user exists
+    const findUser = await User.findOne({ email });
+    if (!findUser) {
+        throw new Error("User not found");
+    }
+
+    // ✔ Get all orders by this email
+    const orders = await Order.find({ email }).sort({ createdAt: -1 }); // latest first
+
+    if (orders.length === 0) {
+        return res.status(200).json({
+            message: "No orders found for this user",
+            orders: []
+        });
+    }
+
+    res.status(200).json({
+        totalOrders: orders.length,
+        orders
+    });
+
+}));
+
+
+
 
 
 
