@@ -8,6 +8,7 @@ import { addToCartRoutes } from "../modules/addTocart/addTocart.route.js"
 import { couponRoutes } from "../modules/coupon/coupon.route.js"
 import path from "path"
 import { orderRoutes } from "../modules/order/order.route.js"
+import { authRoute } from "../modules/Auth/auth.route.js"
 
 
 let router = Router()
@@ -36,6 +37,10 @@ let AllRoutes = [
   {
     path:"/orders",
     routes:orderRoutes
+  },
+  {
+    path:"/auth",
+    routes:authRoute
   }
 ]
 

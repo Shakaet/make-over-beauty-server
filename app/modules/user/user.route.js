@@ -1,6 +1,7 @@
 import express from "express";
 import User from "./user.model.js";
 import { catchAsynFunction } from "../../utils/catchasync.js";
+import { auth } from "../../middleware/auth.js";
 
 
 const router = express.Router();
@@ -28,7 +29,7 @@ router.post("/", catchAsynFunction(async (req, res) => {
 
 
 // Get new user
-router.get("/", catchAsynFunction(async (req, res) => {
+router.get("/", auth("customer"), catchAsynFunction(async (req, res) => {
   
    
 
