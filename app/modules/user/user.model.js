@@ -30,9 +30,35 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["customer", "admin"],
+      enum: ["customer", "admin","manager"],
       default: "customer",
     },
+    
+      product_access: {
+        type: Boolean,
+        default: false,
+      },
+
+      blog_access: {
+        type: Boolean,
+        default: false,
+      },
+
+      order_access: {
+        type: Boolean,
+        default: false,
+      },
+
+      siteSetting_access: {
+        type: Boolean,
+        default: false,
+      },
+
+      customer_access: {
+        type: Boolean,
+        default: false,
+      },
+        
     createdAt: {
       type: Date,
       default: Date.now,

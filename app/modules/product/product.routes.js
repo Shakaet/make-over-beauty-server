@@ -1,23 +1,152 @@
 import { Router } from "express";
 import Product from "./product.model.js";
 import { catchAsynFunction } from "../../utils/catchasync.js";
+import { sendImagetoCloudinary, upload } from "../../utils/sendImagestoCloudinary.js";
 
 
 const router = Router()
 
+
+
+
+router.post(
+  "/create-product",
+
+  // Multiple image upload (fields)
+  upload.fields([
+    { name: "imagePrimary", maxCount: 1 },
+    { name: "imageSecondary", maxCount: 1 },
+    { name: "imageThird", maxCount: 1 },
+    { name: "imageFourth", maxCount: 1 },
+  ]),
+
+  // JSON parse middleware
+  (req, res, next) => {
+    if (req.body.data) {
+      req.body = JSON.parse(req.body.data);
+    }
+    next();
+  },
+
+  catchAsynFunction(async (req, res) => {
+    let bodyData = req.body;
+
+    // Check and upload each image to Cloudinary
+    if (req.files) {
+      if (req.files.imagePrimary) {
+        const uploaded = await sendImagetoCloudinary(
+          "product_primary",
+          req.files.imagePrimary[0].path
+        );
+        bodyData.imagePrimary = uploaded.secure_url;
+      }
+      if (req.files.imageSecondary) {
+        const uploaded = await sendImagetoCloudinary(
+          "product_secondary",
+          req.files.imageSecondary[0].path
+        );
+        bodyData.imageSecondary = uploaded.secure_url;
+      }
+      if (req.files.imageThird) {
+        const uploaded = await sendImagetoCloudinary(
+          "product_third",
+          req.files.imageThird[0].path
+        );
+        bodyData.imageThird = uploaded.secure_url;
+      }
+      if (req.files.imageFourth) {
+        const uploaded = await sendImagetoCloudinary(
+          "product_fourth",
+          req.files.imageFourth[0].path
+        );
+        bodyData.imageFourth = uploaded.secure_url;
+      }
+    }
+
+    // Create product in DB
+    const result = await Product.create(bodyData);
+
+    res.status(201).json({
+      message: "Product created successfully!",
+      data: result,
+    });
+  })
+);
+
+
+
+
 // Get all products
-router.get("/all-products", catchAsynFunction(async (req, res) => {
-  
-   
+router.get(
+  "/all-products",
+  catchAsynFunction(async (req, res) => {
+    let {
+      search,         // product name search
+      category,       // filter by category
+      tag,            // filter by tags
+      minPrice,       // minimum lowprice
+      maxPrice,       // maximum lowprice
+      page = 1,       // pagination page
+      limit = 10,     // items per page
+      sortBy = "createdAt", // sort field
+      order = "desc",        // asc or desc
+    } = req.query;
 
-    // use the underlying MongoDB collection directly
-    const result = await Product.find();
+    page = parseInt(page);
+    limit = parseInt(limit);
 
-    res.status(201).json({ 
-        data:result
-     });
-  } 
-))
+    const query = {};
+
+    // 🔎 Search by product name
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    // 📌 Filter by category
+    if (category) {
+      query.category = category;
+    }
+
+    // 📌 Filter by tag
+    if (tag) {
+      query.tags = tag;
+    }
+
+    // 📌 Filter by price range
+    if (minPrice || maxPrice) {
+      query.lowprice = {};
+      if (minPrice) query.lowprice.$gte = parseFloat(minPrice);
+      if (maxPrice) query.lowprice.$lte = parseFloat(maxPrice);
+    }
+
+    // Pagination
+    const skip = (page - 1) * limit;
+
+    // Sorting
+    const sortOrder = order === "asc" ? 1 : -1;
+    const sortQuery = {};
+    sortQuery[sortBy] = sortOrder;
+
+    // Fetch products
+    const totalProducts = await Product.countDocuments(query);
+    const products = await Product.find(query)
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      totalProducts,
+      page,
+      totalPages: Math.ceil(totalProducts / limit),
+      data: products,
+    });
+  })
+);
+
+
+
+
+
 
 
 // Get single products
@@ -33,6 +162,100 @@ router.get("/product/:id", catchAsynFunction(async (req, res) => {
      });
   } 
 ))
+
+
+// Update Product
+router.patch(
+  "/update-product/:id",
+
+  // Multiple image upload (optional)
+  upload.fields([
+    { name: "imagePrimary", maxCount: 1 },
+    { name: "imageSecondary", maxCount: 1 },
+    { name: "imageThird", maxCount: 1 },
+    { name: "imageFourth", maxCount: 1 },
+  ]),
+
+  // JSON parse middleware
+  (req, res, next) => {
+    if (req.body.data) {
+      req.body = JSON.parse(req.body.data);
+    }
+    next();
+  },
+
+  catchAsynFunction(async (req, res) => {
+    const productId = req.params.id;
+    let updateData = req.body;
+
+    // Update images if provided
+    if (req.files) {
+      if (req.files.imagePrimary) {
+        const uploaded = await sendImagetoCloudinary(
+          "product_primary",
+          req.files.imagePrimary[0].path
+        );
+        updateData.imagePrimary = uploaded.secure_url;
+      }
+      if (req.files.imageSecondary) {
+        const uploaded = await sendImagetoCloudinary(
+          "product_secondary",
+          req.files.imageSecondary[0].path
+        );
+        updateData.imageSecondary = uploaded.secure_url;
+      }
+      if (req.files.imageThird) {
+        const uploaded = await sendImagetoCloudinary(
+          "product_third",
+          req.files.imageThird[0].path
+        );
+        updateData.imageThird = uploaded.secure_url;
+      }
+      if (req.files.imageFourth) {
+        const uploaded = await sendImagetoCloudinary(
+          "product_fourth",
+          req.files.imageFourth[0].path
+        );
+        updateData.imageFourth = uploaded.secure_url;
+      }
+    }
+
+    const result = await Product.findByIdAndUpdate(productId, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      message: "Product updated successfully!",
+      data: result,
+    });
+  })
+);
+
+
+
+
+
+// Delete Product
+router.delete(
+  "/delete-product/:id",
+  catchAsynFunction(async (req, res) => {
+    const productId = req.params.id;
+
+    const deletedProduct = await Product.findByIdAndDelete(productId);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({
+      message: "Product deleted successfully!",
+      data: deletedProduct,
+    });
+  })
+);
+
+
 
 
 export let productRoutes=router

@@ -10,8 +10,8 @@ const router = express.Router();
 router.post("/", catchAsynFunction(async (req, res) => {
   try {
     const userData = req.body;
-    // console.log(userData)
-    const existing = await User.findOne({ email: userData.email });
+    console.log(userData)
+    const existing = await User.findOne({ email: userData.email});
 
     if (existing) {
       return res.status(400).json({ message: "User already exists" });
@@ -41,6 +41,157 @@ router.get("/", auth("customer"), catchAsynFunction(async (req, res) => {
      });
   } 
 ))
+
+
+
+  router.get("/getCustomer/:email", async (req, res) => {
+
+            let email = req.params.email
+
+            // console.log(email)
+
+            let query = { email: email }
+            let result = await User.findOne(query)
+
+            // console.log(result)
+
+                if (!result) {
+                   return res.send({ message: "No customer found" })
+                   }
+                        let customer = false
+                        if (result.role === "customer") {
+                            customer = true
+                        }
+
+                        res.send({ customer })
+
+
+
+      })
+
+
+      router.get("/getadmin/:email", async (req, res) => {
+
+            let email = req.params.email
+
+            // console.log(email)
+
+            let query = { email: email }
+            let result = await User.findOne(query)
+
+            // console.log(result)
+
+                if (!result) {
+                   return res.send({ message: "No admin found" })
+                   }
+                        let admin = false
+                        if (result.role === "admin") {
+                            admin = true
+                        }
+
+                        res.send({ admin })
+
+      })
+
+
+
+      router.get("/getmanager/:email", async (req, res) => {
+
+            let email = req.params.email
+
+            // console.log(email)
+
+            let query = { email: email }
+            let result = await User.findOne(query)
+
+            // console.log(result)
+
+                if (!result) {
+                   return res.send({ message: "No shop manager found" })
+                   }
+                        let manager = false
+                        if (result.role === "manager") {
+                            manager = true
+                        }
+
+                        res.send({ manager })
+
+
+
+      })
+
+        
+
+
+
+
+
+   router.get('/allmanager', async (req, res) => {
+       try {
+         const result = await User.find({ role: "manager" })
+           res.send(result);
+        } catch (err) {
+                res.status(500).send({ message: 'Failed to fetch manager' });
+        }
+    });
+
+
+
+    // PATCH: Update manager access
+    router.patch("/update-manager-access/:id", async (req, res) => {
+          try {
+              const managerId = req.params.id;
+              const {
+                  product_access,
+                  blog_access,
+                  order_access,
+                  siteSetting_access,
+                  customer_access,
+                  role
+              } = req.body;
+
+
+              let user=await User.findById(managerId)
+
+              let isManager=user?.role
+
+              if(isManager !== "manager"){
+                throw new Error("You are not Shop Manager")
+              }
+
+              const updatedUser = await User.findByIdAndUpdate(
+                  managerId,
+                  {
+                      product_access,
+                      blog_access,
+                      order_access,
+                      siteSetting_access,
+                      customer_access
+                  },
+                  { new: true }
+              );
+
+              if (!updatedUser) {
+                  return res.status(404).json({
+                      status: false,
+                      message: "User not found"
+                  });
+              }
+
+              res.status(200).json({
+                  status: true,
+                  message: "Access updated successfully",
+                  data: updatedUser
+              });
+          } catch (error) {
+              res.status(500).json({
+                  status: false,
+                  message: "Something went wrong",
+                  error: error.message
+              });
+          }
+});
+
 
  export let userRoutes=router
 

@@ -110,6 +110,77 @@ router.post("/",catchAsynFunction( async (req, res) =>{
 }))
 
 
+// Get all orders
+router.get(
+  "/all",
+  catchAsynFunction(async (req, res) => {
+    let { search, email, page = 1, limit = 10, sortBy = "createdAt", order = "desc" } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const query = {};
+
+   
+    if (search) {
+      query.invoiceId = { $regex: search, $options: "i" };
+    }
+
+    
+    if (email) {
+      query.email = email;
+    }
+
+   
+    const skip = (page - 1) * limit;
+
+   
+    const sortOrder = order === "asc" ? 1 : -1;
+    const sortQuery = {};
+    sortQuery[sortBy] = sortOrder;
+
+   
+    const totalOrders = await Order.countDocuments(query);
+    const orders = await Order.find(query)
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limit)
+      .populate("items.productId"); // populate product info if needed
+
+    res.status(200).json({
+      totalOrders,
+      page,
+      totalPages: Math.ceil(totalOrders / limit),
+      data: orders,
+    });
+  })
+);
+
+
+router.delete(
+  "/delete/:id",
+  catchAsynFunction(async (req, res) => {
+    const id = req.params.id;
+
+    // Check if order exists
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Delete order
+    await Order.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: `Order with id ${id} has been deleted successfully`,
+    });
+  })
+);
+
+
+
+
+
 router.get("/:email", catchAsynFunction(async (req, res) => {
 
     const { email } = req.params;
@@ -119,7 +190,7 @@ router.get("/:email", catchAsynFunction(async (req, res) => {
         throw new Error("Email is required");
     }
 
-    // Check valid email format (optional)
+    // // Check valid email format (optional)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         throw new Error("Invalid email format");
@@ -132,7 +203,7 @@ router.get("/:email", catchAsynFunction(async (req, res) => {
     }
 
     // ✔ Get all orders by this email
-    const orders = await Order.find({ email }).sort({ createdAt: -1 }); // latest first
+    const orders = await Order.find({email}).sort({ createdAt: -1 }); // latest first
 
     if (orders.length === 0) {
         return res.status(200).json({
@@ -147,6 +218,9 @@ router.get("/:email", catchAsynFunction(async (req, res) => {
     });
 
 }));
+
+
+
 
 
 
