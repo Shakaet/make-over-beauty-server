@@ -193,5 +193,58 @@ router.get("/", auth("customer"), catchAsynFunction(async (req, res) => {
 });
 
 
+        // true field return
+        router.get("/manager/access/:email", async (req, res) => {
+            try {
+                const { email } = req.params;
+
+                if (!email) {
+                    return res.status(400).json({ message: "Email is required" });
+                }
+
+                
+
+                const user = await User.findOne(
+                    { email },
+                    
+                       "role product_access blog_access order_access siteSetting_access customer_access"
+                    
+                );
+
+                console.log(user)
+
+                if (!user) {
+                    return res.status(404).json({ message: "User not found" });
+                }
+
+                // 🚫 Not an ambassador → Access Denied
+                if (user.role !== "manager") {
+                    return res.status(403).json({
+                        message: "Access denied: Not an manager"
+                    });
+                }
+
+                // ✅ Only return TRUE access fields
+                const trueFields = {};
+                if (user.product_access) trueFields.product_access = true;
+                if (user.blog_access) trueFields.blog_access = true;
+                if (user.order_access) trueFields.order_access = true;
+                if (user.siteSetting_access) trueFields.siteSetting_access = true;
+                if (user.customer_access) trueFields.customer_access = true;
+
+                return res.status(200).json({
+                    role: user.role,
+                    access: trueFields
+                });
+
+            } catch (error) {
+                return res.status(500).json({
+                    message: error.message
+                });
+            }
+        });
+
+
+
  export let userRoutes=router
 
