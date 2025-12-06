@@ -20,7 +20,7 @@ router.post("/", catchAsynFunction(async (req, res) => {
     // use the underlying MongoDB collection directly
     const result = await User.create(userData);
 
-    res.status(201).json({ insertedId: result.insertedId });
+    res.status(201).json({ insertedId: result._id });
   } catch (error) {
     console.error("Error saving user:", error);
     res.status(500).json({ message: "Server error", error: error.message });
