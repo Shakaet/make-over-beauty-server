@@ -7,8 +7,6 @@ import { sendImagetoCloudinary, upload } from "../../utils/sendImagestoCloudinar
 const router = Router()
 
 
-
-
 router.post(
   "/create-product",
 
@@ -23,7 +21,11 @@ router.post(
   // JSON parse middleware
   (req, res, next) => {
     if (req.body.data) {
-      req.body = JSON.parse(req.body.data);
+      try {
+        req.body = JSON.parse(req.body.data);
+      } catch (error) {
+        return res.status(400).json({ message: "Invalid JSON in form-data 'data'" });
+      }
     }
     next();
   },
@@ -31,37 +33,25 @@ router.post(
   catchAsynFunction(async (req, res) => {
     let bodyData = req.body;
 
-    // Check and upload each image to Cloudinary
-    if (req.files) {
-      if (req.files.imagePrimary) {
+    // Helper function to upload buffer to Cloudinary
+    const uploadImage = async (fieldName, publicId) => {
+      if (req.files[fieldName]) {
+        const file = req.files[fieldName][0];
+
         const uploaded = await sendImagetoCloudinary(
-          "product_primary",
-          req.files.imagePrimary[0].path
+          publicId,
+          file.buffer   // ⬅ HERE: Uploading buffer instead of file path
         );
-        bodyData.imagePrimary = uploaded.secure_url;
+
+        bodyData[fieldName] = uploaded.secure_url;
       }
-      if (req.files.imageSecondary) {
-        const uploaded = await sendImagetoCloudinary(
-          "product_secondary",
-          req.files.imageSecondary[0].path
-        );
-        bodyData.imageSecondary = uploaded.secure_url;
-      }
-      if (req.files.imageThird) {
-        const uploaded = await sendImagetoCloudinary(
-          "product_third",
-          req.files.imageThird[0].path
-        );
-        bodyData.imageThird = uploaded.secure_url;
-      }
-      if (req.files.imageFourth) {
-        const uploaded = await sendImagetoCloudinary(
-          "product_fourth",
-          req.files.imageFourth[0].path
-        );
-        bodyData.imageFourth = uploaded.secure_url;
-      }
-    }
+    };
+
+    // Upload each image (if exists)
+    await uploadImage("imagePrimary", "product_primary");
+    await uploadImage("imageSecondary", "product_secondary");
+    await uploadImage("imageThird", "product_third");
+    await uploadImage("imageFourth", "product_fourth");
 
     // Create product in DB
     const result = await Product.create(bodyData);
@@ -151,16 +141,16 @@ router.get(
 
 // Get single products
 router.get("/product/:id", catchAsynFunction(async (req, res) => {
-  
-   
-    let id=req.params.id
-    // use the underlying MongoDB collection directly
-    const result = await Product.findById(id);
 
-    res.status(201).json({ 
-        data:result
-     });
-  } 
+
+  let id = req.params.id
+  // use the underlying MongoDB collection directly
+  const result = await Product.findById(id);
+
+  res.status(201).json({
+    data: result
+  });
+}
 ))
 
 
@@ -168,7 +158,6 @@ router.get("/product/:id", catchAsynFunction(async (req, res) => {
 router.patch(
   "/update-product/:id",
 
-  // Multiple image upload (optional)
   upload.fields([
     { name: "imagePrimary", maxCount: 1 },
     { name: "imageSecondary", maxCount: 1 },
@@ -176,10 +165,13 @@ router.patch(
     { name: "imageFourth", maxCount: 1 },
   ]),
 
-  // JSON parse middleware
   (req, res, next) => {
     if (req.body.data) {
-      req.body = JSON.parse(req.body.data);
+      try {
+        req.body = JSON.parse(req.body.data);
+      } catch (e) {
+        return res.status(400).json({ message: "Invalid JSON in data" });
+      }
     }
     next();
   },
@@ -188,37 +180,20 @@ router.patch(
     const productId = req.params.id;
     let updateData = req.body;
 
-    // Update images if provided
-    if (req.files) {
-      if (req.files.imagePrimary) {
-        const uploaded = await sendImagetoCloudinary(
-          "product_primary",
-          req.files.imagePrimary[0].path
-        );
-        updateData.imagePrimary = uploaded.secure_url;
+    const uploadImage = async (fieldName, publicId) => {
+      if (req.files[fieldName]) {
+        const file = req.files[fieldName][0];
+
+        const uploaded = await sendImagetoCloudinary(publicId, file.buffer);
+        updateData[fieldName] = uploaded.secure_url;
       }
-      if (req.files.imageSecondary) {
-        const uploaded = await sendImagetoCloudinary(
-          "product_secondary",
-          req.files.imageSecondary[0].path
-        );
-        updateData.imageSecondary = uploaded.secure_url;
-      }
-      if (req.files.imageThird) {
-        const uploaded = await sendImagetoCloudinary(
-          "product_third",
-          req.files.imageThird[0].path
-        );
-        updateData.imageThird = uploaded.secure_url;
-      }
-      if (req.files.imageFourth) {
-        const uploaded = await sendImagetoCloudinary(
-          "product_fourth",
-          req.files.imageFourth[0].path
-        );
-        updateData.imageFourth = uploaded.secure_url;
-      }
-    }
+    };
+
+    // Upload images if provided
+    await uploadImage("imagePrimary", "product_primary");
+    await uploadImage("imageSecondary", "product_secondary");
+    await uploadImage("imageThird", "product_third");
+    await uploadImage("imageFourth", "product_fourth");
 
     const result = await Product.findByIdAndUpdate(productId, updateData, {
       new: true,
@@ -231,8 +206,6 @@ router.patch(
     });
   })
 );
-
-
 
 
 
@@ -258,4 +231,4 @@ router.delete(
 
 
 
-export let productRoutes=router
+export let productRoutes = router
