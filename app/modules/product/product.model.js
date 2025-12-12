@@ -84,6 +84,21 @@ const productSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+     // ⭐ NEW OPTIONAL FIELDS
+    season: {
+      type: String,
+      enum: ["summer", "winter", "spring"],
+      default: null, // Optional
+    },
+    offer: {
+      type: Boolean,
+      default: false, // Optional
+    },
+    brand: {
+      type: String,
+      default: null, // Optional
+      trim: true,
+    },
     createdAt: {
       type: Date,
       default: Date.now,

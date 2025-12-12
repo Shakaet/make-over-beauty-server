@@ -12,7 +12,7 @@ app.use(cookieParser());
 
 app.use(express.json())
 app.use(cors({
-  origin:["http://localhost:3000","http://localhost:5173","https://makeover-beauty.netlify.app", 'http://192.168.0.169:5173']
+  origin:["http://localhost:3000","http://localhost:5173","https://makeover-beauty.netlify.app","https://beauty-client.vercel.app", 'http://192.168.0.169:5173']
 }))
 
 

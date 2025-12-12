@@ -10,7 +10,8 @@ const router = Router()
 router.post(
   "/create-product",
 
-  // Multiple image upload (fields)
+
+  // 1️⃣ Multer FIRST (parse multipart form-data)
   upload.fields([
     { name: "imagePrimary", maxCount: 1 },
     { name: "imageSecondary", maxCount: 1 },
@@ -18,25 +19,36 @@ router.post(
     { name: "imageFourth", maxCount: 1 },
   ]),
 
-  // JSON parse middleware
+   // 2️⃣ Now JSON Parse (because req.body is now available)
   (req, res, next) => {
-    if (req.body.data) {
-      try {
+    
+      
         req.body = JSON.parse(req.body.data);
-      } catch (error) {
-        return res.status(400).json({ message: "Invalid JSON in form-data 'data'" });
-      }
-    }
+
+        
+        
+      
+       
+    
     next();
   },
 
+
+
+ 
+  
+
   catchAsynFunction(async (req, res) => {
     let bodyData = req.body;
+
+    // console.log(req?.files)
 
     // Helper function to upload buffer to Cloudinary
     const uploadImage = async (fieldName, publicId) => {
       if (req.files[fieldName]) {
         const file = req.files[fieldName][0];
+
+        // console.log(file)
 
         const uploaded = await sendImagetoCloudinary(
           publicId,
