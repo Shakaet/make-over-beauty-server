@@ -19,24 +19,22 @@ router.post(
     { name: "imageFourth", maxCount: 1 },
   ]),
 
-   // 2️⃣ Now JSON Parse (because req.body is now available)
+  // 2️⃣ Now JSON Parse (because req.body is now available)
   (req, res, next) => {
-    
-      
-        req.body = JSON.parse(req.body.data);
 
-        
-        
-      
-       
-    
+    if (req.body.data) {
+      req.body = JSON.parse(req.body.data);
+    }
+
+
+
     next();
   },
 
 
 
- 
-  
+
+
 
   catchAsynFunction(async (req, res) => {
     let bodyData = req.body;
@@ -45,18 +43,16 @@ router.post(
 
     // Helper function to upload buffer to Cloudinary
     const uploadImage = async (fieldName, publicId) => {
-      if (req.files[fieldName]) {
-        const file = req.files[fieldName][0];
+      if (!req.files?.[fieldName]) return;
 
-        // console.log(file)
+      const file = req.files[fieldName][0];
 
-        const uploaded = await sendImagetoCloudinary(
-          publicId,
-          file.buffer   // ⬅ HERE: Uploading buffer instead of file path
-        );
+      const uploaded = await sendImagetoCloudinary(
+        publicId,
+        file.buffer
+      );
 
-        bodyData[fieldName] = uploaded.secure_url;
-      }
+      bodyData[fieldName] = uploaded.secure_url;
     };
 
     // Upload each image (if exists)
@@ -193,13 +189,12 @@ router.patch(
     let updateData = req.body;
 
     const uploadImage = async (fieldName, publicId) => {
-      if (req.files[fieldName]) {
-        const file = req.files[fieldName][0];
+      if (!req.files?.[fieldName]) return;
 
-        const uploaded = await sendImagetoCloudinary(publicId, file.buffer);
-        updateData[fieldName] = uploaded.secure_url;
-      }
-    };
+      const file = req.files[fieldName][0];
+      const uploaded = await sendImagetoCloudinary(publicId, file.buffer);
+      updateData[fieldName] = uploaded.secure_url;
+    }
 
     // Upload images if provided
     await uploadImage("imagePrimary", "product_primary");

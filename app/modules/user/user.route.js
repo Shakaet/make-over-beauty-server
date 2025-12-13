@@ -29,7 +29,7 @@ router.post("/", catchAsynFunction(async (req, res) => {
 
 
 // Get new user
-router.get("/", auth("customer"), catchAsynFunction(async (req, res) => {
+router.get("/", catchAsynFunction(async (req, res) => {
   
    
 
