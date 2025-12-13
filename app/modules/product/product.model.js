@@ -87,9 +87,22 @@ const productSchema = new mongoose.Schema(
      // ⭐ NEW OPTIONAL FIELDS
     season: {
       type: String,
-      enum: ["summer", "winter", "spring"],
+      enum: ["summer", "winter", "spring",],
       default: null, // Optional
     },
+
+    festival:{
+      type: String,
+      enum: ["eid-offer","puja-offer"],
+      default: null, // Optional
+    },
+    Thematic:{
+      type: String,
+      enum: ["black-friday", "clearance-sale"],
+      default: null, // Optional
+
+    },
+    
     offer: {
       type: Boolean,
       default: false, // Optional
