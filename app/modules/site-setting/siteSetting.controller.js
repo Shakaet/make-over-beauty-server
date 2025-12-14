@@ -13,22 +13,25 @@ export const updateSiteSetting = catchAsynFunction(async (req, res) => {
     let imageUrl = "";
 
     // Image exists?
-    if (req.files[`image${i}`]) {
-      const filePath = req.files[`image${i}`][0].path;
+    if (req.files && req.files[`image${i}`] && req.files[`image${i}`][0]) {
+      const file = req.files[`image${i}`][0];
 
-      // Upload to Cloudinary
-      const uploaded = await sendImagetoCloudinary(`section_${i}`, filePath);
+      // Use BUFFER instead of PATH (because we're using memoryStorage)
+      const fileBuffer = file.buffer; // Changed from file.path
+
+      
+      const uploaded = await sendImagetoCloudinary(`section_${i}`, fileBuffer);
 
       imageUrl = uploaded.secure_url;
     }
 
     sections.push({
       image: imageUrl,
-      eyebrow: req.body[`eyebrow${i}`],
-      title: req.body[`title${i}`],
-      copy: req.body[`copy${i}`],
-      cta: req.body[`cta${i}`],
-      align: req.body[`align${i}`],
+      eyebrow: req.body[`eyebrow${i}`] || "",
+      title: req.body[`title${i}`] || "",
+      copy: req.body[`copy${i}`] || "",
+      cta: req.body[`cta${i}`] || "",
+      align: req.body[`align${i}`] || "left",
     });
   }
 
@@ -45,14 +48,13 @@ export const updateSiteSetting = catchAsynFunction(async (req, res) => {
   });
 });
 
+export let AllSiteSetting = catchAsynFunction(async (req, res) => {
 
-export let AllSiteSetting=catchAsynFunction(async(req,res)=>{
-
-    let result= await siteSettingModel.find()
-     res.status(200).json({
+  let result = await siteSettingModel.find()
+  res.status(200).json({
     success: true,
     message: "Site setting retrived successfully!",
-    data:result,
+    data: result,
   });
 
 
@@ -61,9 +63,9 @@ export let AllSiteSetting=catchAsynFunction(async(req,res)=>{
 })
 
 
-  
 
-  
+
+
 
 
 
