@@ -2,6 +2,8 @@ import { Router } from "express";
 import Product from "./product.model.js";
 import { catchAsynFunction } from "../../utils/catchasync.js";
 import { sendImagetoCloudinary, upload } from "../../utils/sendImagestoCloudinary.js";
+import Category from "../category/category.model.js";
+import Brand from "../brand/brand.model.js";
 
 
 const router = Router()
@@ -38,6 +40,27 @@ router.post(
 
   catchAsynFunction(async (req, res) => {
     let bodyData = req.body;
+
+
+    // 🔹 Step 1: Check if category_id exists
+    if (bodyData.category_id) {
+      const categoryExists = await Category.findById(bodyData.category_id);
+      if (!categoryExists) {
+        return res.status(400).json({
+          message: "Invalid category_id: Category does not exist",
+        });
+      }
+    }
+
+    // 🔹 Step 2: Check if brand_id exists
+    if (bodyData.brand_id) {
+      const brandExists = await Brand.findById(bodyData.brand_id);
+      if (!brandExists) {
+        return res.status(400).json({
+          message: "Invalid brand_id: Brand does not exist",
+        });
+      }
+    }
 
     // console.log(req?.files)
 

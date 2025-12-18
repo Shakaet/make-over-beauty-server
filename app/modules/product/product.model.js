@@ -41,11 +41,7 @@ const productSchema = new mongoose.Schema(
       default: 0,
       min: [0, "Reviews count cannot be negative"],
     },
-    category: {
-      type: String,
-      required: [true, "Category is required"],
-      trim: true,
-    },
+    
     imagePrimary: {
       type: String,
       required: [true, "Primary image is required"],
@@ -107,11 +103,20 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false, // Optional
     },
-    brand: {
-      type: String,
-      default: null, // Optional
-      trim: true,
+     // ✅ NEW CATEGORY ID (REF)
+    category_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
     },
+
+    // ✅ NEW BRAND ID (REF)
+    brand_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Brand",
+      required: true,
+    },
+    
     createdAt: {
       type: Date,
       default: Date.now,
