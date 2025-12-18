@@ -150,7 +150,7 @@ router.get(
 
     // Fetch products
     const totalProducts = await Product.countDocuments(query);
-    const products = await Product.find(query)
+    const products = await Product.find(query).populate("brand_id category_id")
       .sort(sortQuery)
       .skip(skip)
       .limit(limit);
@@ -176,7 +176,7 @@ router.get("/product/:id", catchAsynFunction(async (req, res) => {
 
   let id = req.params.id
   // use the underlying MongoDB collection directly
-  const result = await Product.findById(id);
+  const result = await Product.findById(id).populate("brand_id category_id");
 
   res.status(201).json({
     data: result
@@ -210,6 +210,28 @@ router.patch(
   catchAsynFunction(async (req, res) => {
     const productId = req.params.id;
     let updateData = req.body;
+
+    
+
+    // 🔹 Step 1: Check if category_id exists
+    if (updateData.category_id) {
+      const categoryExists = await Category.findById(updateData.category_id);
+      if (!categoryExists) {
+        return res.status(400).json({
+          message: "Invalid category_id: Category does not exist",
+        });
+      }
+    }
+
+    // 🔹 Step 2: Check if brand_id exists
+    if (updateData.brand_id) {
+      const brandExists = await Brand.findById(updateData.brand_id);
+      if (!brandExists) {
+        return res.status(400).json({
+          message: "Invalid brand_id: Brand does not exist",
+        });
+      }
+    }
 
     const uploadImage = async (fieldName, publicId) => {
       if (!req.files?.[fieldName]) return;
