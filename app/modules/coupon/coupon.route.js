@@ -12,9 +12,9 @@ router.post("/validate", async (req, res) => {
     const coupon = await Coupon.findOne({ code });
     // console.log(coupon);
 
-    if (!coupon) {
-      return res.status(404).json({ success: false, message: "Invalid coupon" });
-    }
+    // if (!coupon) {
+    //   return res.status(404).json({ success: false, message: "Invalid coupon" });
+    // }
 
     let isActiveChecks= coupon.isActive===true;
 
