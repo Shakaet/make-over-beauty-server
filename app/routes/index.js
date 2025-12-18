@@ -11,6 +11,7 @@ import { orderRoutes } from "../modules/order/order.route.js"
 import { authRoute } from "../modules/Auth/auth.route.js"
 import { siteSettingRoute } from "../modules/site-setting/siteSetting.route.js"
 import { categoryRoutes } from "../modules/category/category.route.js"
+import {  brandRoutes } from "../modules/brand/brand.route.js"
 
 
 
@@ -52,6 +53,10 @@ let AllRoutes = [
   {
     path:"/category",
     routes:categoryRoutes
+  },
+  {
+    path:"/brand",
+    routes: brandRoutes
   }
 ]
 
