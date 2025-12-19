@@ -12,7 +12,7 @@ router.post(
     const { brandName } = req.body;
 
     const isExist = await Brand.findOne({
-      brandName: brandName.toLowerCase(),
+      brandName: brandName,
     });
 
     if (isExist) {
