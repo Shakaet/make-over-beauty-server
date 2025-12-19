@@ -12,7 +12,7 @@ const productSchema = new mongoose.Schema(
     },
     lowprice: {
       type: Number,
-      required: [true, "Low price is required"],
+      // required: [true, "Low price is required"],
       min: [0, "Price cannot be negative"],
     },
     highprice: {
@@ -109,7 +109,12 @@ const productSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
+    // new field
+    subcategory:{
+      type:String,
+      require:true
 
+    },
     // ✅ NEW BRAND ID (REF)
     brand_id: {
       type: mongoose.Schema.Types.ObjectId,
