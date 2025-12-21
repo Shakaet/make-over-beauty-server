@@ -248,23 +248,182 @@ Query params:
 
 ---
 
-## 📦 Order Routes (`/orders`)
-
-> Handles order creation, listing, and management
-
----
-
-## 🔐 Auth Routes (`/auth`)
-
-> Login, JWT, cookie-based authentication
+ঠিক আছে 👍
+নিচে **Auth API**, **Order API**, এবং **Site Setting API**–এর জন্য **pure `README.md` markdown code** দিলাম।
+👉 এগুলো তুমি আগের `README.md`-এর মধ্যে **copy–paste করে add** করলেই হবে।
 
 ---
 
-## ⚙️ Site Settings (`/site-setting`)
+## 🔐 Auth API (`/auth`)
 
-> Website configuration & settings APIs
+### 🔑 Login
+
+**POST** `/auth/login`
+
+```json
+{
+  "email": "user@gmail.com",
+  "password": "123456"
+}
+```
+
+**Response (example):**
+
+```json
+{
+  "accessToken": "jwt_access_token",
+  "refreshToken": "jwt_refresh_token",
+  "user": {
+    "email": "user@gmail.com",
+    "role": "customer"
+  }
+}
+```
 
 ---
+
+### ♻️ Refresh Token
+
+**POST** `/auth/refresh-token`
+
+```json
+{
+  "refreshToken": "jwt_refresh_token"
+}
+```
+
+**Response:**
+
+```json
+{
+  "accessToken": "new_access_token"
+}
+```
+
+---
+
+## 📦 Order API (`/orders`)
+
+### ➕ Create Order
+
+**POST** `/orders`
+
+```json
+{
+  "email": "user@gmail.com",
+  "subtotal": 1000,
+  "couponCode": "DISCOUNT20",
+  "discountPercent": 20,
+  "totalAmount": 800,
+  "items": [
+    {
+      "productId": "64fabc12345",
+      "price": 500,
+      "quantity": 2
+    }
+  ]
+}
+```
+
+✔ Coupon validation
+✔ Subtotal & total verification
+✔ Product existence check
+✔ Auto invoice generation
+
+---
+
+### 📄 Get All Orders (Admin / Manager)
+
+**GET** `/orders/all`
+
+#### Query Parameters
+
+* `search` → invoiceId
+* `email`
+* `page`
+* `limit`
+* `sortBy`
+* `order` (asc | desc)
+
+---
+
+### 👤 Get Orders by User Email
+
+**GET** `/orders/:email`
+
+**Response:**
+
+```json
+{
+  "totalOrders": 2,
+  "orders": []
+}
+```
+
+---
+
+### ❌ Delete Order
+
+**DELETE** `/orders/delete/:id`
+
+---
+
+## ⚙️ Site Setting API (`/site-setting`)
+
+### ✏️ Update Site Settings
+
+**PATCH** `/site-setting`
+
+* Content-Type: `multipart/form-data`
+* Image Fields:
+
+  * `image1`
+  * `image2`
+  * `image3`
+  * `image4`
+
+```json
+{
+  "siteName": "Makeover Beauty",
+  "logoText": "Beauty Store",
+  "contactEmail": "support@beauty.com"
+}
+```
+
+✔ Supports image upload
+✔ JSON parsed from `data` field
+
+---
+
+### 📄 Get Site Settings
+
+**GET** `/site-setting`
+
+**Response:**
+
+```json
+{
+  "siteName": "Makeover Beauty",
+  "logo": "https://cloudinary.com/..."
+}
+```
+
+---
+
+## 🔒 Security Notes
+
+* JWT based authentication
+* Refresh token supported
+* Role-based access control
+* Server-side validation for:
+
+  * Coupon
+  * Price
+  * User
+  * Product
+
+---
+
 
 ## ❌ Error Handling
 
