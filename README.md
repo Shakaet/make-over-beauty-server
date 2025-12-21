@@ -448,17 +448,7 @@ src/
 ## 🧑‍💻 Author
 
 **Abdulla Al Shakaet**
-MERN Stack Developer
-📍 Chittagong, Bangladesh
+Full Stack Developer
 
----
-
-## ⭐ Notes
-
-* Uses **MongoDB Transactions** for cart & stock safety
-* Supports **role-based access control**
-* Image upload handled via **Cloudinary**
-
----
 
 ✅ Ready for production & deployment 🚀
