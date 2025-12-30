@@ -22,7 +22,7 @@ router.post(
     }
 
     const result = await Brand.create({
-      brandName: brandName.toLowerCase(),
+      brandName: brandName,
     });
 
     res.status(201).json({
@@ -65,7 +65,7 @@ router.put(
 
     const result = await Brand.findByIdAndUpdate(
       id,
-      { brandName: brandName.toLowerCase() },
+      { brandName: brandName },
       { new: true, runValidators: true }
     );
 

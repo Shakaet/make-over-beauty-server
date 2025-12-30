@@ -103,7 +103,7 @@ router.get(
   catchAsynFunction(async (req, res) => {
     let {
       search,         // product name search
-      category,       // filter by category
+      categoryIds,       // filter by category
       tag,            // filter by tags
       minPrice,       // minimum lowprice
       maxPrice,       // maximum lowprice
@@ -124,9 +124,16 @@ router.get(
     }
 
     // 📌 Filter by category
-    if (category) {
-      query.category = category;
+    if (categoryIds) {
+      const ids = categoryIds.split(",");
+      query.category_id = { $in: ids };
     }
+
+    // 📌 Filter by subcategory
+    if (req.query.subcategory) {
+      query.subcategory = req.query.subcategory;
+    }
+
 
     // 📌 Filter by tag
     if (tag) {
@@ -135,9 +142,20 @@ router.get(
 
     // 📌 Filter by price range
     if (minPrice || maxPrice) {
-      query.lowprice = {};
-      if (minPrice) query.lowprice.$gte = parseFloat(minPrice);
-      if (maxPrice) query.lowprice.$lte = parseFloat(maxPrice);
+      query.$or = [
+        {
+          lowprice: {
+            ...(minPrice && { $gte: Number(minPrice) }),
+            ...(maxPrice && { $lte: Number(maxPrice) }),
+          },
+        },
+        {
+          highprice: {
+            ...(minPrice && { $gte: Number(minPrice) }),
+            ...(maxPrice && { $lte: Number(maxPrice) }),
+          },
+        },
+      ];
     }
 
     // Pagination
@@ -211,7 +229,7 @@ router.patch(
     const productId = req.params.id;
     let updateData = req.body;
 
-    
+
 
     // 🔹 Step 1: Check if category_id exists
     if (updateData.category_id) {

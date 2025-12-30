@@ -6,7 +6,6 @@ const brandSchema = new mongoose.Schema({
     required: true,
     unique: true,      // ✅ duplicate block
     trim: true,
-    lowercase: true,  // Apple = apple
   },
   createdAt: {
     type: Date,
